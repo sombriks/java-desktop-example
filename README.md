@@ -41,16 +41,49 @@ So, let's make a simple desktop app!
 Something like this:
 
 ```
-╔═══════════════════════════════════════════════════════╗
-║ [=] My Todo App                                       ║
-╠══════════════════════╦════════════════════════════════╣
-║                      ║                                ║
-║ [ Filter or Create ] ║ [ Type to filter or create   ] ║
-║                      ║                                ║
-║ Basic            (5) ║ [ ] Review monthly report      ║
-║ General          (2) ║ [X] Workout                    ║
-║ Groceries        (3) ║ [ ] Grocery shopping           ║
-║ Important        (1) ║                                ║
-║                      ║                                ║
-╚══════════════════════╩════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════╗
+║ {My Todo App}                                               ║
+╠══════════════════════════════╦════════════════════════════════╣
+║                              ║                                ║
+║ [ Type to filter or Create ] ║ [ Type to filter or create   ] ║
+║                              ║                                ║
+║ Basic                    (5) ║ [ ] Review monthly report      ║
+║ General                  (2) ║ [X] Workout                    ║
+║ Groceries                (3) ║ [ ] Grocery shopping           ║
+║ Important                (1) ║                                ║
+║                              ║                                ║
+╚══════════════════════════════╩════════════════════════════════╝
+```
+
+Now that all the hard work is done, let's code it.
+
+## No HTML, what to use?
+
+Unlike css/javascript frameworks, there is no new desktop widget toolkit every
+week, so there are fewer but solid options. 
+
+For the sake of simplicity, i am testing all samples on Linux only, although
+some of those might run just fine on other platforms.
+
+Let's try the following UI toolkits:
+
+- Swing
+- JavaFX
+- SWT
+- TamboUI
+
+Before we start , please [install jbang using your preferred method][ins-jbang].
+
+[ins-jbang]: https://www.jbang.dev/documentation/jbang/latest/installation.html
+
+### Good Old Swing
+
+Swing is the second oldest UI toolkit available to Java. It kind succeeded AWT,
+and decided to draw everything in java so little platform-dependent code would
+be needed to port it, as the _write once, run everywhere_ thing could hold true.
+
+The presented frame can come to life using swing easy like this:
+
+```bash
+jbang init TodoSwing.java
 ```
