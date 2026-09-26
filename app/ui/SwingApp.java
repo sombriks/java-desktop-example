@@ -1,5 +1,8 @@
 package app.ui;
 
+//DEPS com.formdev:flatlaf:3.5.4
+//DEPS com.formdev:flatlaf-extras:3.5.4
+
 import javax.swing.*;
 import java.awt.*;
 import com.formdev.flatlaf.FlatLightLaf;

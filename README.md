@@ -82,7 +82,7 @@ Use the powers of teminal to scaffold a minimum java app:
 
 ```bash
 mkdir -p app/{core,ui}
-touch app/core/TodoManager.java
+touch app/core/Todo{Item,List,Manager}.java
 touch app/ui/{Swoing,JavaFx,Swt,Terminal}App.java
 ```
 
