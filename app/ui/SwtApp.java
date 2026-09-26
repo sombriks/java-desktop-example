@@ -1,3 +1,4 @@
 package app.ui;
 
-public class SwtApp {}
+public class SwtApp {
+}
