@@ -9,15 +9,10 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 
-void main(String... args) {
-    SwingUtilities.invokeLater(() -> {
-        try {
-            FlatDarkLaf.setup();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        new SwingApp().setVisible(true);
-    });
+public class TodoSwing {
+    public static void main(String... args) {
+        SwingApp.createApp();
+    }
 }
 
 class SwingApp extends JFrame {
@@ -58,5 +53,18 @@ class SwingApp extends JFrame {
         splitPane.setDividerLocation(220);
         splitPane.setContinuousLayout(true);
         add(splitPane, BorderLayout.CENTER);
+        
+        setVisible(true);
+    }
+    
+    public static void createApp(){
+        SwingUtilities.invokeLater(() -> {
+            try {
+                FlatDarkLaf.setup();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            new SwingApp();
+        });
     }
 }
