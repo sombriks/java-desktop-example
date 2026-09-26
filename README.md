@@ -68,13 +68,23 @@ some of those might run just fine on other platforms.
 Let's try the following UI toolkits:
 
 - Swing
-- JavaFX
+- JavaFx
 - SWT
 - TamboUI
 
 Before we start , please [install jbang using your preferred method][ins-jbang].
 
 [ins-jbang]: https://www.jbang.dev/documentation/jbang/latest/installation.html
+
+### Project skeleton
+
+Use the powers of teminal to scaffold a minimum java app:
+
+```bash
+mkdir -p app/{core,ui}
+touch app/core/TodoManager.java
+touch app/ui/{Swoing,JavaFx,Swt,Terminal}App.java
+```
 
 ### Good Old Swing
 
