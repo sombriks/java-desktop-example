@@ -1,3 +1,3 @@
 package app.ui;
 
-public class TerminalAopp {}
+public class TerminalApp {}
