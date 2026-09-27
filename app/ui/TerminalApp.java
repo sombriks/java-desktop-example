@@ -60,8 +60,18 @@ public class TerminalApp extends ToolkitApp {
         StyleEngine style = StyleEngine
                 .create();
         style.addStylesheet("""
-                .focusable :focus {
+                .no-border {
+                    border-type: none;
+                }
+                .aside {
+                }
+                .principal {
+                }
+                .focusable:focus {
                     border-color: green;
+                }
+                ListElement-item:selected {
+                    text-style: bold;
                 }
                 """);
         runner().styleEngine(style);
@@ -116,13 +126,16 @@ public class TerminalApp extends ToolkitApp {
     protected Element render() {
 
         TextInputElement todoFilter = textInput(todoFilterState)
-                .id("todoFilter").addClass("focusable")
-                .rounded().placeholder("create/search todos")
+                .id("todoFilter")
+                .addClass("focusable")
+                .placeholder("create/search todos")
                 .placeholderColor(Color.DARK_GRAY)
+                .rounded()
                 .onSubmit(this::addList);
         todoList
                 .addClass("focusable").fill()
-                .rounded().focusable().autoScroll()
+                .focusable().autoScroll()
+                .rounded()
                 .onKeyEvent(keyEvent -> {
                     if (keyEvent.isConfirm()) {
                         loadItems();
@@ -133,13 +146,16 @@ public class TerminalApp extends ToolkitApp {
                 });
 
         TextInputElement itemFilter = textInput(itemFilterState)
-                .id("itemFilter").addClass("focusable")
-                .rounded().placeholder("create/search tasks")
+                .id("itemFilter")
+                .addClass("focusable")
+                .placeholder("create/search tasks")
                 .placeholderColor(Color.DARK_GRAY)
+                .rounded()
                 .onSubmit(this::addTask);
         itemList
                 .addClass("focusable").fill()
-                .rounded().focusable().autoScroll()
+                .focusable().autoScroll()
+                .rounded()
                 .onKeyEvent(keyEvent -> {
                     if (keyEvent.isConfirm()) {
                         checkTask();
@@ -149,19 +165,17 @@ public class TerminalApp extends ToolkitApp {
                 });
 
         return panel(" My Todo App ")
+                .addClass("no-border")
                 .add(panel()
+                        .addClass("aside")
                         .add(todoFilter)
                         .add(todoList)
-                        .margin(1)
-                        .borderless()
-                        .percent(33))
+                        .fill(1))
                 .add(panel()
+                        .addClass("principal")
                         .add(itemFilter)
                         .add(itemList)
-                        .margin(1)
-                        .borderless()
-                        .percent(66))
-                .doubleBorder()
+                        .fill(3))
                 .horizontal();
     }
 

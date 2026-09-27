@@ -10,8 +10,8 @@ Use local resources wisely and get the best possible from internet resources.
 
 ### Local but evergreen
 
-Being locally installed does not mean to be terminally outdated. See how 
-browsers do, how [steam client][steam] this thing so well that it's easy to 
+Being locally installed does not mean to be terminally outdated. See how
+browsers do, how [steam client][steam] this thing so well that it's easy to
 forget that it was installed, not a page in a browser.
 
 [steam]: https://store.steampowered.com
@@ -60,7 +60,7 @@ Now that all the hard work is done, let's code it.
 ## No HTML, what to use?
 
 Unlike css/javascript frameworks, there is no new desktop widget toolkit every
-week, so there are fewer but solid options. 
+week, so there are fewer but solid options.
 
 For the sake of simplicity, i am testing all samples on Linux only, although
 some of those might run just fine on other platforms.
@@ -114,7 +114,7 @@ void main(String... args) {
 }
 ```
 
-We have some core operations for our todo app in `TodoManager`, they'll be 
+We have some core operations for our todo app in `TodoManager`, they'll be
 used by all desktop samples.
 
 Swing code goes like this:
@@ -289,23 +289,23 @@ public class SwingApp extends JFrame {
 
 Swing at its best: layouts, models, renderes and events.
 
-Note also the dark theme registration: the [flatlaf][flatlaf] dependency 
-makes the swing appearance more bearable, and the defaults delivers a good 
+Note also the dark theme registration: the [flatlaf][flatlaf] dependency
+makes the swing appearance more bearable, and the defaults delivers a good
 experience.
 
 [flatlaf]: https://github.com/JFormDesigner/FlatLaf
 
-The imperative, push-based mutations must be noted. Swing predates all these 
-modern UI concepts that we all learned to deal with over the last 10 years 
+The imperative, push-based mutations must be noted. Swing predates all these
+modern UI concepts that we all learned to deal with over the last 10 years
 of frontend development.
 
 It works, but choosing swing in 2026 might not be the best take for local first.
 
 ## A modern terminal application
 
-At first, a character-based interface and _modern_ might not look like 
-belonging in the same phrase, but think twice. [TamboUI][tamboui] makes 
-wonders for you and, since it runs over a terminal, it might save the day 
+At first, a character-based interface and _modern_ might not look like
+belonging in the same phrase, but think twice. [TamboUI][tamboui] makes
+wonders for you and, since it runs over a terminal, it might save the day
 when any tool must be provided over ssh.
 
 [tamboui]: https://tamboui.dev/
@@ -334,9 +334,232 @@ void main(String... args) throws Exception {
 
 And our implementation goes like this:
 
+```java
+package app.ui;
 
+//DEPS dev.tamboui:tamboui-toolkit:LATEST
+//DEPS dev.tamboui:tamboui-jline3-backend:LATEST
+
+import app.core.TodoItem;
+import app.core.TodoList;
+import app.core.TodoManager;
+import dev.tamboui.css.engine.StyleEngine;
+import dev.tamboui.style.Color;
+import dev.tamboui.toolkit.app.ToolkitApp;
+import dev.tamboui.toolkit.element.Element;
+import dev.tamboui.toolkit.elements.ListElement;
+import dev.tamboui.toolkit.elements.TextInputElement;
+import dev.tamboui.toolkit.event.EventResult;
+import dev.tamboui.tui.TuiConfig;
+import dev.tamboui.widgets.input.TextInputState;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static dev.tamboui.toolkit.Toolkit.*;
+
+public class TerminalApp extends ToolkitApp {
+
+    private final TextInputState todoFilterState = new TextInputState();
+    private final TextInputState itemFilterState = new TextInputState();
+
+    private final List<TodoList> todoData = new ArrayList<>();
+    private final List<TodoItem> itemData = new ArrayList<>();
+
+    private final ListElement<TodoList> todoList = list().id("todoList")
+            .data(todoData, r -> {
+                String template = "%-20s (%3d)";
+                return text(template.formatted(r.description(), r.items().size()));
+            });
+    ListElement<TodoItem> itemList = list().id("itemList")
+            .data(itemData, r -> {
+                String template = "[%s] %s";
+                return text(template.formatted(r.done() ? "X" : " ", r.description()));
+            });
+
+    private final TodoManager manager;
+
+    public TerminalApp(TodoManager manager) {
+        this.manager = manager;
+    }
+
+    @Override
+    protected TuiConfig configure() {
+        return super.configure()
+                .toBuilder()
+                .mouseCapture(true)
+                .build();
+    }
+
+    @Override
+    protected void onStart() {
+        setWindowTitle("My Todo App");
+        StyleEngine style = StyleEngine
+                .create();
+        style.addStylesheet("""
+                .no-border {
+                    border-type: none;
+                }
+                .aside {
+                }
+                .principal {
+                }
+                .focusable:focus {
+                    border-color: green;
+                }
+                ListElement-item:selected {
+                    text-style: bold;
+                }
+                """);
+        runner().styleEngine(style);
+
+        loadTodos();
+        loadItems();
+    }
+
+    private void loadTodos() {
+        todoData.clear();
+        todoData.addAll(manager.getTodoLists(todoFilterState.text()));
+    }
+
+    private void loadItems() {
+        TodoList todos = todoData.get(todoList.selected());
+        itemData.clear();
+        itemData.addAll(manager.getTodoItems(todos.description(), itemFilterState.text()));
+    }
+
+    private void addList() {
+        String todo = todoFilterState.text().trim();
+        todoFilterState.clear();
+        TodoList todos = !todo.isBlank()
+                ? manager.setTodoList(todo)
+                : null;
+        loadTodos();
+        if (todos != null) {
+            todoList.selected(todoData.indexOf(todos));
+        }
+        loadItems();
+        runner().focusManager().setFocus("itemFilter");
+    }
+
+    private void addTask() {
+        String task = itemFilterState.text().trim();
+        itemFilterState.clear();
+        if (!task.isBlank()) {
+            TodoList todos = todoData.get(todoList.selected());
+            manager.setTodoItem(todos.description(), task, false);
+            loadItems();
+        }
+    }
+
+    private void checkTask() {
+        TodoList todos = todoData.get(todoList.selected());
+        TodoItem item = itemData.get(itemList.selected());
+        manager.setTodoItem(todos.description(), item.description(), !item.done());
+        loadItems();
+    }
+
+    @Override
+    protected Element render() {
+
+        TextInputElement todoFilter = textInput(todoFilterState)
+                .id("todoFilter")
+                .addClass("focusable")
+                .placeholder("create/search todos")
+                .placeholderColor(Color.DARK_GRAY)
+                .rounded()
+                .onSubmit(this::addList);
+        todoList
+                .addClass("focusable").fill()
+                .focusable().autoScroll()
+                .rounded()
+                .onKeyEvent(keyEvent -> {
+                    if (keyEvent.isConfirm()) {
+                        loadItems();
+                        runner().focusManager().setFocus("itemList");
+                        return EventResult.HANDLED;
+                    }
+                    return EventResult.UNHANDLED;
+                });
+
+        TextInputElement itemFilter = textInput(itemFilterState)
+                .id("itemFilter")
+                .addClass("focusable")
+                .placeholder("create/search tasks")
+                .placeholderColor(Color.DARK_GRAY)
+                .rounded()
+                .onSubmit(this::addTask);
+        itemList
+                .addClass("focusable").fill()
+                .focusable().autoScroll()
+                .rounded()
+                .onKeyEvent(keyEvent -> {
+                    if (keyEvent.isConfirm()) {
+                        checkTask();
+                        return EventResult.HANDLED;
+                    }
+                    return EventResult.UNHANDLED;
+                });
+
+        return panel(" My Todo App ")
+                .addClass("no-border")
+                .add(panel()
+                        .addClass("aside")
+                        .add(todoFilter)
+                        .add(todoList)
+                        .fill(1))
+                .add(panel()
+                        .addClass("principal")
+                        .add(itemFilter)
+                        .add(itemList)
+                        .fill(3))
+                .horizontal();
+    }
+
+    public static void createApp(TodoManager todoManager) throws Exception {
+        new TerminalApp(todoManager).run();
+    }
+}
+```
+
+Now, this is interesting.
+
+We have a CSS dialect, a render function and a fluent api to setup the UI,
+and the separation of concerns is pretty solid.
+
+It is arguably better to maintain that the swing one.
 
 ## JavaFX, the really modern one
+
+Our next sample is JavaFX and starts like the others:
+
+```bash
+jbang init TodoFx.java
+```
+
+The entrypoint is also identical:
+
+```java
+///usr/bin/env jbang "$0" "$@" ; exit $?
+//SOURCES app/**/*.java
+//JAVA 25+
+
+import app.core.TodoManager;
+
+import static app.ui.JavaFxApp.createApp;
+
+void main(String... args) {
+    createApp(new TodoManager());
+}
+```
+
+Again, using the same core business component.
+
+The JavaFx implementation goes like this:
+
+```java
+
+```
 
 ## SWT is still around
 
