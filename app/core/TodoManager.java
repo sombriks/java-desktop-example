@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ public class TodoManager {
             if (Files.exists(p)) {
                 lists = Arrays.stream(new JsonMapper()
                                 .readValue(p.toFile(), TodoList[].class))
+                        .sorted(Comparator.comparing(TodoList::description))
                         .collect(Collectors.toCollection(ArrayList::new));
             }
         } catch (Exception e) {
@@ -59,6 +61,7 @@ public class TodoManager {
     public List<TodoList> getTodoLists(String q) {
         return lists.stream()
                 .filter(l -> l.description().contains(q))
+                .sorted(Comparator.comparing(TodoList::description))
                 .toList();
     }
 
@@ -90,6 +93,7 @@ public class TodoManager {
                 .stream()
                 .flatMap(List::stream)
                 .filter(i -> i.description().contains(q))
+                .sorted(Comparator.comparing(TodoItem::description))
                 .toList();
     }
 
