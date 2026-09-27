@@ -12,6 +12,7 @@ import dev.tamboui.toolkit.app.ToolkitApp;
 import dev.tamboui.toolkit.element.Element;
 import dev.tamboui.toolkit.elements.ListElement;
 import dev.tamboui.toolkit.elements.TextInputElement;
+import dev.tamboui.toolkit.event.EventResult;
 import dev.tamboui.tui.TuiConfig;
 import dev.tamboui.widgets.input.TextInputState;
 
@@ -28,17 +29,15 @@ public class TerminalApp extends ToolkitApp {
     private final List<TodoList> todoData = new ArrayList<>();
     private final List<TodoItem> itemData = new ArrayList<>();
 
-    private final ListElement todoList = list()
-            .id("todoList").addClass("focusable")
-            .rounded().focusable().autoScroll().fill()
+    private final ListElement<TodoList> todoList = list().id("todoList")
             .data(todoData, r -> {
-                return text(r.description());
+                String template = "%-20s (%3d)";
+                return text(template.formatted(r.description(), r.items().size()));
             });
-    private final ListElement itemList = list()
-            .id("itemList").addClass("focusable")
-            .rounded().focusable().autoScroll().fill()
+    ListElement<TodoItem> itemList = list().id("itemList")
             .data(itemData, r -> {
-                return text(r.description());
+                String template = "[%s] %s";
+                return text(template.formatted(r.done() ? "X" : " ", r.description()));
             });
 
     private final TodoManager manager;
@@ -82,16 +81,73 @@ public class TerminalApp extends ToolkitApp {
         itemData.addAll(manager.getTodoItems(todos.description(), itemFilterState.text()));
     }
 
+    private void addList() {
+        String todo = todoFilterState.text().trim();
+        todoFilterState.clear();
+        TodoList todos = !todo.isBlank()
+                ? manager.setTodoList(todo)
+                : null;
+        loadTodos();
+        if (todos != null) {
+            todoList.selected(todoData.indexOf(todos));
+        }
+        loadItems();
+        runner().focusManager().setFocus("itemFilter");
+    }
+
+    private void addTask() {
+        String task = itemFilterState.text().trim();
+        itemFilterState.clear();
+        if (!task.isBlank()) {
+            TodoList todos = todoData.get(todoList.selected());
+            manager.setTodoItem(todos.description(), task, false);
+            loadItems();
+        }
+    }
+
+    private void checkTask() {
+        TodoList todos = todoData.get(todoList.selected());
+        TodoItem item = itemData.get(itemList.selected());
+        manager.setTodoItem(todos.description(), item.description(), !item.done());
+        loadItems();
+    }
+
     @Override
     protected Element render() {
+
         TextInputElement todoFilter = textInput(todoFilterState)
                 .id("todoFilter").addClass("focusable")
                 .rounded().placeholder("create/search todos")
-                .placeholderColor(Color.DARK_GRAY);
+                .placeholderColor(Color.DARK_GRAY)
+                .onSubmit(this::addList);
+        todoList
+                .addClass("focusable").fill()
+                .rounded().focusable().autoScroll()
+                .onKeyEvent(keyEvent -> {
+                    if (keyEvent.isConfirm()) {
+                        loadItems();
+                        runner().focusManager().setFocus("itemList");
+                        return EventResult.HANDLED;
+                    }
+                    return EventResult.UNHANDLED;
+                });
+
         TextInputElement itemFilter = textInput(itemFilterState)
                 .id("itemFilter").addClass("focusable")
                 .rounded().placeholder("create/search tasks")
-                .placeholderColor(Color.DARK_GRAY);
+                .placeholderColor(Color.DARK_GRAY)
+                .onSubmit(this::addTask);
+        itemList
+                .addClass("focusable").fill()
+                .rounded().focusable().autoScroll()
+                .onKeyEvent(keyEvent -> {
+                    if (keyEvent.isConfirm()) {
+                        checkTask();
+                        return EventResult.HANDLED;
+                    }
+                    return EventResult.UNHANDLED;
+                });
+
         return panel(" My Todo App ")
                 .add(panel()
                         .add(todoFilter)

@@ -64,7 +64,7 @@ public class SwingApp extends JFrame {
         itemsFilter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "create/search tasks");
         todoItemList.setFont(fonteMono);
         todoItemList.setCellRenderer(new DefaultListCellRenderer() {
-            String template = "[%s] %s";
+            private String template = "[%s] %s";
 
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
