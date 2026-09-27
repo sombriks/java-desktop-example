@@ -6,6 +6,7 @@ package app.ui;
 import app.core.TodoItem;
 import app.core.TodoList;
 import app.core.TodoManager;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatDarkLaf;
 
 import javax.swing.*;
@@ -22,24 +23,13 @@ public class SwingApp extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        setJMenuBar(new JMenuBar() {
-            {
-                add(new JMenu("My Todo App") {
-                    {
-                        JMenuItem exitItem = new JMenuItem("Exit");
-                        exitItem.addActionListener(e -> System.exit(0));
-                        add(exitItem);
-                    }
-                });
-            }
-        });
-
         JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
         JTextField listsFilter = new JTextField();
         JList<TodoList> todoList = new JList<>();
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         leftPanel.add(listsFilter, BorderLayout.NORTH);
         leftPanel.add(new JScrollPane(todoList), BorderLayout.CENTER);
+        listsFilter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "create/search todos");
         todoList.setFont(fonteMono);
         todoList.setCellRenderer(new DefaultListCellRenderer() {
             private String template = "%-20s (%3d)";
@@ -71,6 +61,7 @@ public class SwingApp extends JFrame {
         rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         rightPanel.add(itemsFilter, BorderLayout.NORTH);
         rightPanel.add(new JScrollPane(todoItemList), BorderLayout.CENTER);
+        itemsFilter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "create/search tasks");
         todoItemList.setFont(fonteMono);
         todoItemList.setCellRenderer(new DefaultListCellRenderer() {
             String template = "[%s] %s";

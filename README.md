@@ -42,7 +42,7 @@ Something like this:
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║ {My Todo App}                                               ║
+║ {My Todo App}                                                 ║
 ╠══════════════════════════════╦════════════════════════════════╣
 ║                              ║                                ║
 ║ [ Type to filter or Create ] ║ [ Type to filter or create   ] ║
@@ -102,8 +102,6 @@ This jbang entrypoint will provide a simple call to the swing app:
 
 ```java
 /// usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS com.formdev:flatlaf:3.5.4
-//DEPS com.formdev:flatlaf-extras:3.5.4
 //SOURCES app/**/*.java
 //JAVA 25+
 
@@ -124,9 +122,13 @@ Swing code goes like this:
 ```java
 package app.ui;
 
+//DEPS com.formdev:flatlaf:3.5.4
+//DEPS com.formdev:flatlaf-extras:3.5.4
+
 import app.core.TodoItem;
 import app.core.TodoList;
 import app.core.TodoManager;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatDarkLaf;
 
 import javax.swing.*;
@@ -143,24 +145,13 @@ public class SwingApp extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        setJMenuBar(new JMenuBar() {
-            {
-                add(new JMenu("My Todo App") {
-                    {
-                        JMenuItem exitItem = new JMenuItem("Exit");
-                        exitItem.addActionListener(e -> System.exit(0));
-                        add(exitItem);
-                    }
-                });
-            }
-        });
-
         JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
         JTextField listsFilter = new JTextField();
         JList<TodoList> todoList = new JList<>();
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         leftPanel.add(listsFilter, BorderLayout.NORTH);
         leftPanel.add(new JScrollPane(todoList), BorderLayout.CENTER);
+        listsFilter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "create/search todos");
         todoList.setFont(fonteMono);
         todoList.setCellRenderer(new DefaultListCellRenderer() {
             private String template = "%-20s (%3d)";
@@ -192,6 +183,7 @@ public class SwingApp extends JFrame {
         rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         rightPanel.add(itemsFilter, BorderLayout.NORTH);
         rightPanel.add(new JScrollPane(todoItemList), BorderLayout.CENTER);
+        itemsFilter.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "create/search tasks");
         todoItemList.setFont(fonteMono);
         todoItemList.setCellRenderer(new DefaultListCellRenderer() {
             String template = "[%s] %s";
@@ -293,7 +285,6 @@ public class SwingApp extends JFrame {
         });
     }
 }
-
 ```
 
 Swing at its best: layouts, models, renderes and events.
@@ -324,6 +315,26 @@ For this one our entrypoint goes like this:
 ```bash
 jbang init TodoTerminal.java
 ```
+
+The entrypoint goes quite the same as our previous example:
+
+```java
+///usr/bin/env jbang "$0" "$@" ; exit $?
+//SOURCES app/**/*.java
+//JAVA 25+
+
+import app.core.TodoManager;
+
+import static app.ui.TerminalApp.createApp;
+
+void main(String... args) throws Exception {
+    createApp(new TodoManager());
+}
+```
+
+And our implementation goes like this:
+
+
 
 ## JavaFX, the really modern one
 
