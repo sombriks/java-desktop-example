@@ -1045,4 +1045,68 @@ public class SwtApp {
 }
 ```
 
+The swt version is the most verbose one.
+
+On the other hand, it will integrate perfectly with your current desktop.
+
+But boy, it's so much work to get just the same.
+
 ## But what about the installer?
+
+So, the user is not supposed to keep a working jbang setup, so we need to
+package and ship it.
+
+> **Note on Packaging Prerequisites:**
+> `jpackage` relies on host system utilities to create package formats:
+> - For `--type rpm`: `rpm-build` (command `rpmbuild`) is required
+    (`sudo dnf install rpm-build` on Fedora/RHEL).
+> - For `--type deb`: `dpkg-deb` and `fakeroot` are required
+    (`sudo apt install dpkg fakeroot` on Debian/Ubuntu).
+> - For `--type app-image`: No external packaging tools are required; produces a
+    self-contained runtime folder.
+
+```bash
+rm -rf dist lib TodoSwt.jar
+mkdir dist
+# choose which app you want to ship
+jbang export portable TodoSwt.java
+mv lib dist
+mv TodoSwt.jar dist
+# generate rpm package with jpackage (requires rpm-build)
+jpackage \
+  --type rpm \
+  --dest dist \
+  --input dist \
+  --name todo-swt \
+  --main-jar TodoSwt.jar \
+  --main-class TodoSwt \
+  --app-version 1.0.0 \
+  --linux-shortcut
+```
+
+The generated file will be inside the dist folder, and can be installed like
+this:
+
+```bash
+sudo dnf install dist/todo-swt-1.0.0-1.x86_64.rpm
+```
+
+And _just like that_, it will appear on your menu.
+
+You can check the `/opt/todo-swt` folder to see what is packaged. In short,
+it's a trimmed down jre containing all that is needed to run the application.
+
+## What a time to be alive
+
+Deploy java applications on desktop took just 30 years to get it right. Sure,
+the world was way more hostile back then, with microsoft trying to kill java
+at any cost, and even the distribution channels still not mature.
+
+Now it's all past, check your options noire broadly. Not everything needs to
+be a web app to use web services. Consider the good part of local-first
+applications. Even the project configuration can be as simple as a couple of
+jbang entrypoints.
+
+Happy coding, and check [the complete sample code here][repo].
+
+[repo]: https://github.com/sombriks/java-desktop-example

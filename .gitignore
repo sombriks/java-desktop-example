@@ -28,3 +28,4 @@ out
 *.iml
 
 todos.json
+dist
