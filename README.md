@@ -68,9 +68,9 @@ some of those might run just fine on other platforms.
 Let's try the following UI toolkits:
 
 - Swing + FlatLaf
+- TamboUI
 - JavaFx
 - SWT
-- TamboUI
 
 Before we start , please [install jbang using your preferred method][ins-jbang].
 
@@ -86,7 +86,7 @@ touch app/core/Todo{Item,List,Manager}.java
 touch app/ui/{Swing,JavaFx,Swt,Terminal}App.java
 ```
 
-### Good Old Swing
+## Good Old Swing
 
 Swing is the second oldest UI toolkit available to Java. It succeeded AWT and
 decided to draw everything in java, so little platform-dependent code would
@@ -102,6 +102,8 @@ This jbang entrypoint will provide a simple call to the swing app:
 
 ```java
 /// usr/bin/env jbang "$0" "$@" ; exit $?
+//DEPS com.formdev:flatlaf:3.5.4
+//DEPS com.formdev:flatlaf-extras:3.5.4
 //SOURCES app/**/*.java
 //JAVA 25+
 
@@ -121,9 +123,6 @@ Swing code goes like this:
 
 ```java
 package app.ui;
-
-//DEPS com.formdev:flatlaf:3.5.4
-//DEPS com.formdev:flatlaf-extras:3.5.4
 
 import app.core.TodoItem;
 import app.core.TodoList;
@@ -297,10 +296,37 @@ public class SwingApp extends JFrame {
 
 ```
 
-Swing at its best: models, renderes and events.
+Swing at its best: layouts, models, renderes and events.
 
 Note also the dark theme registration: the [flatlaf][flatlaf] dependency 
 makes the swing appearance more bearable, and the defaults delivers a good 
 experience.
 
 [flatlaf]: https://github.com/JFormDesigner/FlatLaf
+
+The imperative, push-based mutations must be noted. Swing predates all these 
+modern UI concepts that we all learned to deal with over the last 10 years 
+of frontend development.
+
+It works, but choosing swing in 2026 might not be the best take for local first.
+
+## A modern terminal application
+
+At first, a character-based interface and _modern_ might not look like 
+belonging in the same phrase, but think twice. [TamboUI][tamboui] makes 
+wonders for you and, since it runs over a terminal, it might save the day 
+when any tool must be provided over ssh.
+
+[tamboui]: https://tamboui.dev/
+
+For this one our entrypoint goes like this:
+
+```bash
+jbang init TodoTerminal.java
+```
+
+## JavaFX, the really modern one
+
+## SWT is still around
+
+## But what about the installer?
