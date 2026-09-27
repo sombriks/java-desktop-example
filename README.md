@@ -78,7 +78,7 @@ Before we start , please [install jbang using your preferred method][ins-jbang].
 
 ### Project skeleton
 
-Use the powers of teminal to scaffold a minimum java app:
+Use the powers of terminal to scaffold a minimum java app:
 
 ```bash
 mkdir -p app/{core,ui}
@@ -88,11 +88,11 @@ touch app/ui/{Swoing,JavaFx,Swt,Terminal}App.java
 
 ### Good Old Swing
 
-Swing is the second oldest UI toolkit available to Java. It kind succeeded AWT,
-and decided to draw everything in java so little platform-dependent code would
-be needed to port it, as the _write once, run everywhere_ thing could hold true.
+Swing is the second oldest UI toolkit available to Java. It succeeded AWT and
+decided to draw everything in java, so little platform-dependent code would
+be needed to port it, so the _write once, run everywhere_ thing could hold true.
 
-The presented frame can come to life using swing easy like this:
+The presented frame can come to life using swing easily like this:
 
 ```bash
 jbang init TodoSwing.java

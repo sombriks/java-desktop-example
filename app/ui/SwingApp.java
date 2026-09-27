@@ -28,12 +28,30 @@ public class SwingApp extends JFrame {
         menuBar.add(appMenu);
         setJMenuBar(menuBar);
 
+        Font fonteMono = new Font(Font.MONOSPACED, Font.PLAIN, 14);
+
         JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
         JTextField listsFilter = new JTextField();
         JList<TodoList> todoList = new JList<>();
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         leftPanel.add(listsFilter, BorderLayout.NORTH);
         leftPanel.add(new JScrollPane(todoList), BorderLayout.CENTER);
+        todoList.setFont(fonteMono);
+
+        JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
+        JTextField itemsFilter = new JTextField();
+        JList<TodoItem> todoItemList = new JList<>();
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        rightPanel.add(itemsFilter, BorderLayout.NORTH);
+        rightPanel.add(new JScrollPane(todoItemList), BorderLayout.CENTER);
+        todoItemList.setFont(fonteMono);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+        splitPane.setDividerLocation(250);
+        splitPane.setContinuousLayout(true);
+
+        add(splitPane, BorderLayout.CENTER);
+        setVisible(true);
 
         todoList.setModel(new DefaultListModel<>() {
             @Override
@@ -46,27 +64,11 @@ public class SwingApp extends JFrame {
                 return manager.getTodoLists(listsFilter.getText()).get(index);
             }
         });
-        listsFilter.addActionListener(e -> {
-            String list = listsFilter.getText().trim();
-            if (!list.isBlank()) {
-                manager.setTodoList(list);
-            }
-            listsFilter.setText("");
-            todoList.updateUI();
-        });
-
-        JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
-        JTextField itemsFilter = new JTextField();
-        JList<TodoItem> totoItemList = new JList<>();
-        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        rightPanel.add(itemsFilter, BorderLayout.NORTH);
-        rightPanel.add(new JScrollPane(totoItemList), BorderLayout.CENTER);
-
-        totoItemList.setModel(new DefaultListModel<>() {
+        todoItemList.setModel(new DefaultListModel<>() {
             @Override
             public int getSize() {
                 TodoList selected = todoList.getSelectedValue();
-                if(selected == null) {
+                if (selected == null) {
                     return 0;
                 }
                 return manager.getTodoItems(selected.description(), itemsFilter.getText()).size();
@@ -75,38 +77,70 @@ public class SwingApp extends JFrame {
             @Override
             public TodoItem getElementAt(int index) {
                 TodoList selected = todoList.getSelectedValue();
-                if(selected == null) {
+                if (selected == null) {
                     return null;
                 }
                 return manager.getTodoItems(selected.description(), itemsFilter.getText()).get(index);
             }
         });
+
+        todoList.setCellRenderer(new DefaultListCellRenderer() {
+            private String template = "%-20s (%3d)";
+
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof TodoList todos) {
+                    setText(template.formatted(todos.description(), todos.items().size()));
+                }
+                return this;
+            }
+        });
+        todoItemList.setCellRenderer(new DefaultListCellRenderer() {
+            String template = "[%s] %s";
+
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof TodoItem item) {
+                    setText(template.formatted(item.done() ? "X" : " ", item.description()));
+                }
+                return this;
+            }
+        });
+
+        listsFilter.addActionListener(e -> {
+            String list = listsFilter.getText().trim();
+            listsFilter.setText("");
+            TodoList selected = !list.isBlank()
+                    ? manager.setTodoList(list)
+                    : null;
+            todoList.updateUI();
+            todoList.setSelectedValue(selected, true);
+        });
         itemsFilter.addActionListener(e -> {
             String item = itemsFilter.getText().trim();
             itemsFilter.setText("");
-            if (item.isEmpty()) {
-                return;
-            }
+
             TodoList selected = todoList.getSelectedValue();
-            if(selected == null) {
+            if (selected == null) {
                 return;
             }
-            manager.setTodoItem(selected.description(), item);
-            totoItemList.updateUI();
+
+            TodoItem itemSelected = !item.isBlank()
+                    ? manager.setTodoItem(selected.description(), item)
+                    : null;
+            todoList.updateUI();
+            todoItemList.updateUI();
+            todoItemList.setSelectedValue(itemSelected, true);
         });
+
         todoList.addListSelectionListener(e -> {
-            if(todoList.getSelectedValue() == null) {
+            if (todoList.getSelectedValue() == null) {
                 return;
             }
-            totoItemList.updateUI();
+            todoItemList.updateUI();
         });
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        splitPane.setDividerLocation(220);
-        splitPane.setContinuousLayout(true);
-
-        add(splitPane, BorderLayout.CENTER);
-        setVisible(true);
     }
 
     public static void createApp(TodoManager manager) {
