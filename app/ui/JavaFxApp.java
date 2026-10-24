@@ -9,7 +9,12 @@ import app.core.TodoManager;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -70,7 +75,7 @@ public class JavaFxApp extends Application {
         });
 
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem doneMenuItem = new MenuItem("Selected is Done");
+        MenuItem doneMenuItem = new javafx.scene.control.MenuItem("Selected is Done");
         doneMenuItem.setOnAction(e -> {
             TodoList todoSelected = todoListView.getSelectionModel().getSelectedItem();
             TodoItem itemSelected = todoItemListView.getSelectionModel().getSelectedItem();

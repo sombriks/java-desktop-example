@@ -13,6 +13,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import app.core.TodoList;
+
 public class TodoManager {
 
     private static final String TODOS = "todos.json";
@@ -24,7 +26,7 @@ public class TodoManager {
             Path p = Paths.get(TODOS);
             if (Files.exists(p)) {
                 lists = Arrays.stream(new JsonMapper()
-                                .readValue(p.toFile(), TodoList[].class))
+                                .readValue(p.toFile(), app.core.TodoList[].class))
                         .sorted(Comparator.comparing(TodoList::description))
                         .collect(Collectors.toCollection(ArrayList::new));
             }
@@ -65,27 +67,27 @@ public class TodoManager {
                 .toList();
     }
 
-    public TodoItem setTodoItem(String list, String item) {
+    public app.core.TodoItem setTodoItem(String list, String item) {
         return setTodoItem(list, item, false);
     }
 
-    public TodoItem setTodoItem(String list, String item, boolean done) {
+    public app.core.TodoItem setTodoItem(String list, String item, boolean done) {
         TodoList todos = setTodoList(list);
         String trimmed = item.trim();
-        TodoItem todo = todos.items().stream()
+        app.core.TodoItem todo = todos.items().stream()
                 .filter(t -> trimmed.equals(t.description()))
                 .findFirst()
                 .orElse(null);
         if (todo != null) {
             todos.items().remove(todo);
         }
-        todo = new TodoItem(trimmed, done);
+        todo = new app.core.TodoItem(trimmed, done);
         todos.items().add(todo);
         save();
         return todo;
     }
 
-    public List<TodoItem> getTodoItems(String list, String q) {
+    public List<app.core.TodoItem> getTodoItems(String list, String q) {
         return lists.stream()
                 .filter(l -> list.equals(l.description()))
                 .findFirst()
@@ -93,11 +95,11 @@ public class TodoManager {
                 .stream()
                 .flatMap(List::stream)
                 .filter(i -> i.description().contains(q))
-                .sorted(Comparator.comparing(TodoItem::description))
+                .sorted(Comparator.comparing(app.core.TodoItem::description))
                 .toList();
     }
 
-    public List<TodoItem> getTodoItems(String list, String q, boolean done) {
+    public List<app.core.TodoItem> getTodoItems(String list, String q, boolean done) {
         return getTodoItems(list, q).stream()
                 .filter(i -> i.done() == done)
                 .toList();

@@ -3,10 +3,10 @@ package app.core;
 import java.util.ArrayList;
 import java.util.List;
 
-public record TodoList(String description, List<TodoItem> items) {
+public record TodoList(String description, List<app.core.TodoItem> items) {
     public TodoList {
         if (items == null) {
-            items = new ArrayList<TodoItem>();
+            items = new ArrayList<app.core.TodoItem>();
         }
     }
 
